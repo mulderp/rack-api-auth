@@ -11,11 +11,12 @@ module Rack
     end
   
     def call(env)
+
       env['rack.auth'] = Authenticator.new(env, @authenticated_users)
       @authenticator = env['rack.auth']
 
       if env['PATH_INFO'] == SESSION_PATH 
-        puts "--> Rack::Auth::Middleware: #{@authenticator.request.request_method} #{SESSION_PATH}"
+        puts "--> Rack::Auth::Middleware: #{@authenticator.request.request_method} #{SESSION_PATH} #{@authenticator.params}"
         status, headers, body = route_request
       else
         puts "--> enter @app.call for #{env['PATH_INFO']}"
@@ -28,7 +29,7 @@ module Rack
     end
 
     def route_request
-      if @authenticator.request.get?
+      if @authenticator.request.get? or @authenticator.request.options?
         status, headers, body = @authenticator.authenticated?
       elsif @authenticator.request.post?
         status, headers, body = @authenticator.authenticate!
@@ -77,10 +78,19 @@ module Rack
           status = 200
           body = session['user']
         else
-          status = 401
-          body = "No valid session"
+          status = 200
+          body = { auth: false }
         end
         [ status, {}, body.to_json ]
+      end
+
+      def params
+        raw_params = @env["rack.input"].read
+        if raw_params.present?
+            JSON.parse(raw_params.gsub(/([a-z]+):/, '"\1":')) 
+        else
+          raw_params
+        end
       end
 
       def clear!
@@ -113,10 +123,6 @@ module Rack
 
       def request
         @request ||= Rack::Request.new(@env)
-      end
-
-      def params
-        request.params
       end
 
     end
