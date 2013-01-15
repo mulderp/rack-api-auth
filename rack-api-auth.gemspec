@@ -1,12 +1,11 @@
 # -*- encoding: utf-8 -*-
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'rack-api-auth/version'
 require 'rack-api-auth'
 
 Gem::Specification.new do |gem|
   gem.name          = "rack-api-auth"
-  gem.version       = Rack::Api::Auth::VERSION
+  gem.version       = "0.0.1" 
   gem.authors       = ["Patrick Mulder"]
   gem.email         = ["mulder.patrick@gmail.com"]
   gem.description   = %q{Authentication middleware for rack (experimental)}
