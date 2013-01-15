@@ -59,7 +59,7 @@ module Rack
 
       def lookup_user
         @authenticated_users.each do |user|
-          if user[:username] == params["username"]
+          if user[:username] == params.fetch("username")
             return user
           end
         end
@@ -85,11 +85,11 @@ module Rack
       end
 
       def params
-        raw_params = @env["rack.input"].read
-        if raw_params.present?
-            JSON.parse(raw_params.gsub(/([a-z]+):/, '"\1":')) 
+        @raw_params ||= @env["rack.input"].read
+        if @raw_params.present?
+            JSON.parse(@raw_params.gsub(/([a-z]+):/, '"\1":')) 
         else
-          raw_params
+          @raw_params
         end
       end
 
