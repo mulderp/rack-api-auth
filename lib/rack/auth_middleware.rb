@@ -86,11 +86,6 @@ module Rack
 
       def params
         @raw_params ||= @env["rack.input"].read
-        if @raw_params.present?
-            JSON.parse(@raw_params.gsub(/([a-z]+):/, '"\1":')) 
-        else
-          @raw_params
-        end
       end
 
       def clear!
