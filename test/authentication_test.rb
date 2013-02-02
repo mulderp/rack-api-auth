@@ -6,25 +6,16 @@ require "json"
 $:.unshift('lib')
 require 'rack-api-auth'
 
-class API < Cuba; end
-API.define do
-   on "/api/confidential" do
-     res.write "Greetings from inside"
-   end
-
-   on "/api/pulbic" do
-     res.write "Greetings from outside"
-   end
-end
+require_relative "app/api"
 
 class AuthenticationTest < Test::Unit::TestCase
   include Rack::Test::Methods
 
-  Tokens = [{ :id => 32, :username => "patrick", :token => "79d4d9ee34e3f589ee94d080357afd8e" }]
+  Tokens = [{ :id => 42, :token => "79d4d9ee34e3f589ee94d080357afd8e" }]
 
   def app
     builder = Rack::Builder.new do
-      use Rack::AuthMiddleware, :users => Tokens
+      use Rack::AuthMiddleware, :tokens => Tokens
 
       run API
     end
@@ -32,9 +23,12 @@ class AuthenticationTest < Test::Unit::TestCase
   end
 
   def test_access_success
-    get "/api/confidential", 'Authorization: Token token="79d4d9ee34e3f589ee94d080357afd8e"', "CONTENT_TYPE" => "application/json"
+    header 'Authorization', "79d4d9ee34e3f589ee94d080357afd8e"
+
+    get "/api/confidential" 
 
     assert_equal last_response.status, 200
+    assert_equal "Greetings from inside", last_response.body
   end
 
   def test_access_fails
