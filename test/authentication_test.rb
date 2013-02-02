@@ -8,8 +8,12 @@ require 'rack-api-auth'
 
 class API < Cuba; end
 API.define do
-   on "hello" do
-     res.write "Hello world!"
+   on "/api/confidential" do
+     res.write "Greetings from inside"
+   end
+
+   on "/api/pulbic" do
+     res.write "Greetings from outside"
    end
 end
 
@@ -21,9 +25,8 @@ class AuthenticationTest < Test::Unit::TestCase
   def app
     builder = Rack::Builder.new do
       use Rack::AuthMiddleware, :users => Tokens
-      use API
 
-      run lambda { |env| [200, {'Content-Type' => 'text/plain'}, ['All responses are OK']] }
+      run API
     end
     builder
   end
@@ -31,19 +34,13 @@ class AuthenticationTest < Test::Unit::TestCase
   def test_access_success
     get "/api/confidential", 'Authorization: Token token="79d4d9ee34e3f589ee94d080357afd8e"', "CONTENT_TYPE" => "application/json"
 
-    assert_equal last_response.status,  200
-
-    user = JSON.parse(last_response.body)
-    assert_equal 'patrick', user['username']
+    assert_equal last_response.status, 200
   end
 
   def test_access_fails
     get "/api/confidential", 'Authorization: Token token=""', "CONTENT_TYPE" => "application/json"
 
-    assert_equal last_response.status,  200
-
-    user = JSON.parse(last_response.body)
-    assert_equal 'patrick', user['username']
+    assert_equal last_response.status, 400
   end
 
 
