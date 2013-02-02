@@ -21,7 +21,7 @@ class AuthenticationTest < Test::Unit::TestCase
   end
 
   def test_create_session_success
-    post "/auth/session", { :username => "patrick", :password => "dummy" }
+    post "/auth/session", { :username => "patrick", :password => "dummy" }, "CONTENT_TYPE" => "application/json"
 
     assert_equal last_response.status,  200
 
@@ -30,7 +30,7 @@ class AuthenticationTest < Test::Unit::TestCase
   end
 
   def test_create_session_failure
-    post "/auth/session", { :username => "frank", :password => "dummy" }
+    post "/auth/session", { :username => "frank", :password => "dummy" }, "CONTENT_TYPE" => "application/json"
 
     assert_equal 401, last_response.status
     response = JSON.parse(last_response.body)
@@ -39,7 +39,7 @@ class AuthenticationTest < Test::Unit::TestCase
 
   def test_check_session_success
     # TODO: fixme
-    post "/auth/session", { :username => "frank", :password => "dummy" }
+    post "/auth/session", { :username => "frank", :password => "dummy" }, "CONTENT_TYPE" => "application/json"
     cookies = last_response.cookies # cookies needed , e.g. set_cookie ["value=10"]
     get "/auth/session"
     assert_equal 200, last_response.status
